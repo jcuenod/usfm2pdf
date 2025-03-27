@@ -2,10 +2,10 @@ from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
 import tempfile
 import os
+import xml.etree.ElementTree as ET
 from html import escape
-from css_helper import generate_css
 
-def usx_to_pdf(usx_elem, output_file, header=''):
+def usx_to_pdf(usx_elem, output_file):
     """
     Convert USX XML element to a formatted PDF file using WeasyPrint.
     
@@ -17,7 +17,7 @@ def usx_to_pdf(usx_elem, output_file, header=''):
     html_content = generate_html_from_usx(usx_elem)
     
     # Create CSS for styling
-    css_content = generate_css(header)
+    css_content = generate_css()
     
     # Configure fonts
     font_config = FontConfiguration()
@@ -52,15 +52,12 @@ def generate_html_from_usx(usx_elem):
         '<title>Bible Text</title>',
         '</head>',
         '<body>',
-        '<div class="side-notice">FOR REVIEW - NOTE: This document does not reflect all USFM content. Footnotes and other elements are omitted.</div>',
         '<div class="bible-content">'
     ]
     
     # Process USX elements
     book_title = ""
     current_chapter = ""
-    has_printed_current_chapter = False
-    introductory_material = True
     
     for elem in usx_elem.iter():
         if elem.tag == 'book':
@@ -70,37 +67,26 @@ def generate_html_from_usx(usx_elem):
         elif elem.tag == 'chapter':
             chapter_num = elem.get('number', '')
             if chapter_num:
-                introductory_material = False
                 current_chapter = chapter_num
-                has_printed_current_chapter = False
-                # html.append(f'<h2 class="chapter-number">Chapter {escape(chapter_num)}</h2>')
+                html.append(f'<h2 class="chapter-number">Chapter {escape(chapter_num)}</h2>')
         
         elif elem.tag == 'para':
             style_name = elem.get('style', 'p')
             
             # Determine paragraph class based on style
             para_class = 'paragraph'
-            if style_name in ['s', 's1', 's2']: # Section heading
+            if style_name in ['s1', 's2']:
                 para_class = 'section-heading'
-            elif style_name == 'q1': # Poetry line
+            elif style_name == 'q1':
                 para_class = 'poetry-q1'
-            elif style_name == 'q2': # Poetry line 2
+            elif style_name == 'q2':
                 para_class = 'poetry-q2'
-            elif style_name == 'b': # Blank line
+            elif style_name == 'b':
                 html.append('<div class="blank-line"></div>')
                 continue
-            elif introductory_material:
-                para_class = "introductory-material"
             
             # Start paragraph
-            if not has_printed_current_chapter and para_class == "paragraph":
-                # We are going to add the chapter number to the first paragraph of the chapter
-                # so we need to suppress the indent
-                html.append(f'<p class="{para_class} suppress-indent">')
-                html.append(f'<span class="chapter-number">{escape(current_chapter)}</span>')
-                has_printed_current_chapter = True
-            else:
-                html.append(f'<p class="{para_class}">')
+            html.append(f'<p class="{para_class}">')
             
             # Process paragraph content
             if elem.text:
@@ -109,8 +95,7 @@ def generate_html_from_usx(usx_elem):
             for child in elem:
                 if child.tag == 'verse' and child.get('number'):
                     verse_num = child.get('number')
-                    if verse_num != "1":
-                        html.append(f'<span class="verse-number">{escape(verse_num)}</span>')
+                    html.append(f'<span class="verse-number">{escape(verse_num)}</span>')
                     
                     # Add verse text
                     if child.text:
@@ -142,3 +127,123 @@ def generate_html_from_usx(usx_elem):
     html.append('</html>')
     
     return '\n'.join(html)
+
+def generate_css():
+    """Generate CSS for styling the HTML content."""
+    css = """
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
+    
+    @page {
+        size: letter;
+        margin: 1in;
+        @bottom-left {
+            content: "DRAFT: This PDF does not reflect all USFM content. Footnotes and other elements are omitted.";
+            font-family: Noto Serif, serif;
+            font-size: 7pt;
+            color: #666;
+        }
+    }
+    
+    body {
+        font-family: Noto Serif, serif;
+        font-size: 10pt; /* Reduced from 12pt */
+        line-height: 1.5;
+        color: #000;
+    }
+    
+    .bible-content {
+        margin: 0 auto;
+        column-count: 2;       /* Create two columns */
+        column-gap: 1.5em;     /* Space between columns */
+        column-rule: 1px solid #eee; /* Optional: thin line between columns */
+    }
+    
+    /* Ensure these elements don't break across columns */
+    .book-title, .chapter-number, .section-heading {
+        column-span: all;      /* Make headings span across all columns */
+    }
+    
+    .book-title {
+        font-size: 20pt;       /* Reduced from 24pt */
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 1em;
+    }
+    
+    .chapter-number {
+        font-size: 16pt;       /* Reduced from 18pt */
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+    }
+    
+    .paragraph {
+        text-indent: 1.5em;
+        margin-bottom: 0.5em;
+        text-align: justify;   /* Justify text for cleaner column edges */
+    }
+    
+    .section-heading {
+        font-size: 12pt;       /* Reduced from 14pt */
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        text-indent: 0;
+    }
+    
+    .poetry-q1 {
+        margin-left: 1.5em;
+        text-indent: 0;
+    }
+    
+    .poetry-q2 {
+        margin-left: 2.5em;    /* Reduced from 3em to save space */
+        text-indent: 0;
+    }
+    
+    .verse-number {
+        font-size: 6pt;        /* Reduced from 7pt */
+        color: blue;
+        font-weight: bold;
+        vertical-align: super;
+        margin-right: 0.2em;
+    }
+    
+    .divine-name {
+        font-variant: small-caps;
+        font-weight: bold;
+    }
+    
+    .blank-line {
+        height: 0.8em;         /* Reduced from 1em */
+    }
+    
+    .side-note {
+        display: none;         /* Hidden in body, shown via @page rule */
+    }
+    
+    /* Prevent orphans and widows */
+    p {
+        orphans: 2;
+        widows: 2;
+    }
+    """
+    return css
+
+# Optional: Add a direct conversion function for convenience
+def convert_usfm_to_pdf(usfm_string, output_file):
+    """
+    Convert USFM string directly to PDF.
+    
+    Args:
+        usfm_string: USFM content as string
+        output_file: Path to the output PDF file
+    """
+    from usfm_grammar import USFMParser
+    
+    # Parse USFM to USX
+    parser = USFMParser(usfm_string)
+    usx_elem = parser.to_usx()
+    
+    # Convert USX to PDF
+    usx_to_pdf(usx_elem, output_file)
