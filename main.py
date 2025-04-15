@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
             # Parse USFM to USX
             my_parser = USFMParser(input_usfm_str)
-            usx_elem = my_parser.to_usx()
+            usx_elem = my_parser.to_usx(ignore_errors=True)
 
             # Check if output_file exists and confirm overwrite
             if os.path.exists(output_file):
