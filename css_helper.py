@@ -47,7 +47,7 @@ body {
 }
 
 .chapter-number {
-    font-size: 16pt;       /* Reduced from 18pt */
+    font-size: 16pt;
     font-weight: bold;
     margin: 0 0.2em;
     float: left;
@@ -56,7 +56,7 @@ body {
 .paragraph {
     text-indent: 1.5em;
     margin-bottom: 0.5em;
-    text-align: justify;   /* Justify text for cleaner column edges */
+    text-align: justify;
 }
 
 .paragraph.suppress-indent {
@@ -64,7 +64,7 @@ body {
 }
 
 .section-heading {
-    font-size: 9pt;       /* Reduced from 14pt */
+    font-size: 9pt;
     font-weight: bold;
     margin-top: 1em;
     margin-bottom: 0.5em;
@@ -83,12 +83,12 @@ body {
 }
 
 .poetry-q2 {
-    margin-left: 2.5em;    /* Reduced from 3em to save space */
+    margin-left: 2.5em;
     text-indent: 0;
 }
 
 .verse-number {
-    font-size: 6pt;        /* Reduced from 7pt */
+    font-size: 6pt;
     color: oklch(0.546 0.245 262.881);
     font-weight: bold;
     vertical-align: super;
@@ -100,11 +100,11 @@ body {
 }
 
 .blank-line {
-    height: 0.8em;         /* Reduced from 1em */
+    height: 0.8em;
 }
 
 .side-note {
-    display: none;         /* Hidden in body, shown via @page rule */
+    display: none;
 }
 
 /* Prevent orphans and widows */
@@ -114,7 +114,8 @@ p {
 }
 """
 
-def get_edge_css(header=''):
+
+def get_edge_css(header=""):
     header_css = ""
     if header:
         escaped_header = header.replace("'", "\\'").replace('"', '\\"')
@@ -165,7 +166,8 @@ def get_edge_css(header=''):
     }}
     """
 
-def generate_css(header=''):
+
+def generate_css(header=""):
     """Generate CSS for styling the HTML content."""
     # Prepare header CSS based on whether a header was provided
 
