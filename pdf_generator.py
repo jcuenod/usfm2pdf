@@ -5,7 +5,10 @@ import os
 from html import escape
 from css_helper import generate_css
 
-def usx_to_pdf(usx_elem, output_file, header=''):
+DEFAULT_NOTO_URL = "https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap"
+
+
+def usx_to_pdf(usx_elem, output_file, header="", custom_noto_url=None):
     """
     Convert USX XML element to a formatted PDF file using WeasyPrint.
     
@@ -30,11 +33,14 @@ def usx_to_pdf(usx_elem, output_file, header=''):
     try:
         # Generate PDF using WeasyPrint
         html = HTML(filename=temp_html_path)
-        css = CSS(string=css_content)
+        main_stylesheet = CSS(string=css_content)
+        font_url = custom_noto_url or DEFAULT_NOTO_URL
         html.write_pdf(
             output_file,
-            stylesheets=[css],
-            font_config=font_config
+            stylesheets=[
+                main_stylesheet,
+                font_url,
+            ],
         )
         print(f"PDF created: {output_file}")
     finally:
@@ -91,9 +97,10 @@ def generate_html_from_usx(usx_elem):
                 continue
             elif introductory_material:
                 para_class = "introductory-material"
-            
+
+            should_maybe_print_chapter = not (para_class == "introductory-material" or para_class == "section-heading")
             # Start paragraph
-            if not has_printed_current_chapter and para_class == "paragraph":
+            if should_maybe_print_chapter and not has_printed_current_chapter:
                 # We are going to add the chapter number to the first paragraph of the chapter
                 # so we need to suppress the indent
                 html.append(f'<p class="{para_class} suppress-indent">')

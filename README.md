@@ -27,9 +27,10 @@ python main.py "path/to/your/*.sfm" --output-dir path/to/output
 
 ### Options
 
-- `-o, --output`: Specify output PDF file path (default: output.pdf)
-- `-d, --output-dir`: Specify output directory for multiple files (default: same as input)
-- `--header`: Optional header text to display (will be printed in the top center of every page)
+- `-o, --output`: Specify output PDF file path. Default: `output.pdf` (when converting a single file). When converting multiple files, the output PDF file path will be the same as the input file name with a `.pdf` extension.
+- `-d, --output-dir`: Specify output directory for multiple files. Default: _same as input_
+- `--header`: Header text to display (will be printed in the top center of every page). Default: _None_.
+- `--noto-url`: Custom Noto font URL (Google Fonts) to support specific script. Default: _None_.
 
 ## Fonts
 

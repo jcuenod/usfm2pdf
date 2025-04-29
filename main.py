@@ -9,7 +9,8 @@ def parse_arguments():
     parser.add_argument('input_pattern', help='Path or glob pattern for input USFM file(s)')
     parser.add_argument('-o', '--output', help='Path to output PDF file (ignored if multiple files are processed)')
     parser.add_argument('-d', '--output-dir', help='Directory for output files (default: same as input)')
-    parser.add_argument('--header', help='Optional header text to display', default='')
+    parser.add_argument('--header', help='Header text to display', default='')
+    parser.add_argument('--noto-url', help='Custom Noto font URL (Google Fonts) to support specific script', default=None)
     return parser.parse_args()
 
 def read_usfm_file(file_path):
@@ -74,7 +75,7 @@ if __name__ == "__main__":
                     continue
 
             # Convert USX to PDF
-            usx_to_pdf(usx_elem, output_file, header=args.header)
+            usx_to_pdf(usx_elem, output_file, header=args.header, custom_noto_url=args.noto_url)
 
         except Exception as e:
             print(f"Error processing {input_file}: {str(e)}")

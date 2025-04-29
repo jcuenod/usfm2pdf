@@ -1,7 +1,3 @@
-font_css = """
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap');
-"""
-
 main_css = """
 body {
     font-family: Noto Serif, serif;
@@ -172,5 +168,5 @@ def get_edge_css(header=''):
 def generate_css(header=''):
     """Generate CSS for styling the HTML content."""
     # Prepare header CSS based on whether a header was provided
-    
-    return font_css + get_edge_css(header) + main_css
+
+    return get_edge_css(header) + main_css
