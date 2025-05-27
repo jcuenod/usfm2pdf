@@ -19,6 +19,14 @@ def parse_arguments():
         "-d", "--output-dir", help="Directory for output files (default: same as input)"
     )
     parser.add_argument("--header", help="Header text to display", default="")
+    # Add argument for no overwrite. If specified, existing files will not be overwritten.
+    parser.add_argument(
+        "--no-overwrite",
+        "-n",
+        help="Do not overwrite existing output files",
+        action="store_true",
+        default=False,
+    )
     parser.add_argument(
         "--noto-url",
         help="Custom Noto font URL (Google Fonts) to support specific script",
@@ -84,6 +92,10 @@ if __name__ == "__main__":
 
             # Check if output_file exists and confirm overwrite
             if os.path.exists(output_file):
+                if args.no_overwrite:
+                    print(f"Skipping {input_file} as {output_file} already exists.")
+                    continue
+
                 response = (
                     input(f"File {output_file} already exists. Overwrite? (y/n): ")
                     .strip()
