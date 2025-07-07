@@ -81,15 +81,6 @@ if __name__ == "__main__":
                 # Otherwise, generate output filename based on input filename
                 output_file = get_output_filename(input_file, args.output_dir)
 
-            print(f"Processing {input_file} -> {output_file}")
-
-            # Read USFM file
-            input_usfm_str = read_usfm_file(input_file)
-
-            # Parse USFM to USX
-            my_parser = USFMParser(input_usfm_str)
-            usx_elem = my_parser.to_usx(ignore_errors=True)
-
             # Check if output_file exists and confirm overwrite
             if os.path.exists(output_file):
                 if args.no_overwrite:
@@ -104,6 +95,15 @@ if __name__ == "__main__":
                 if response != "y":
                     print(f"Skipping {input_file}")
                     continue
+
+            print(f"Processing {input_file} -> {output_file}")
+
+            # Read USFM file
+            input_usfm_str = read_usfm_file(input_file)
+
+            # Parse USFM to USX
+            my_parser = USFMParser(input_usfm_str)
+            usx_elem = my_parser.to_usx(ignore_errors=True)
 
             # Convert USX to PDF
             usx_to_pdf(
